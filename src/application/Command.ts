@@ -1,1 +1,3 @@
-export interface Command { execute(): string[]; }
+export interface Command {
+  execute(): string[];
+}

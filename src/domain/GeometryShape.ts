@@ -7,7 +7,13 @@ export abstract class GeometryShape extends Shape {
   private readonly vertical: readonly string[];
   private readonly dimensions: readonly string[];
 
-  protected constructor(id: string, values: Record<string, number>, horizontal: readonly string[], vertical: readonly string[], dimensions: readonly string[]) {
+  protected constructor(
+    id: string,
+    values: Record<string, number>,
+    horizontal: readonly string[],
+    vertical: readonly string[],
+    dimensions: readonly string[],
+  ) {
     super(id);
     this.horizontal = horizontal;
     this.vertical = vertical;
@@ -15,13 +21,19 @@ export abstract class GeometryShape extends Shape {
     this.values = this.validate(values);
   }
 
-  get geometry(): Readonly<Record<string, number>> { return { ...this.values }; }
+  get geometry(): Readonly<Record<string, number>> {
+    return { ...this.values };
+  }
   override get attributes(): Readonly<Record<string, string>> {
-    return { ...super.attributes, ...Object.fromEntries(Object.entries(this.values).map(([k, v]) => [k, String(v)])) };
+    return {
+      ...super.attributes,
+      ...Object.fromEntries(Object.entries(this.values).map(([k, v]) => [k, String(v)])),
+    };
   }
 
   override move(dx: number, dy: number): void {
-    Numeric.parse(dx, 'dx'); Numeric.parse(dy, 'dy');
+    Numeric.parse(dx, 'dx');
+    Numeric.parse(dy, 'dy');
     const next = { ...this.values };
     for (const name of this.horizontal) next[name] = this.value(name) + dx;
     for (const name of this.vertical) next[name] = this.value(name) + dy;
@@ -30,7 +42,9 @@ export abstract class GeometryShape extends Shape {
 
   override scale(factor: number): void {
     Numeric.positive(factor, 'scale factor');
-    this.values = this.validate(Object.fromEntries(Object.entries(this.values).map(([k, v]) => [k, v * factor])));
+    this.values = this.validate(
+      Object.fromEntries(Object.entries(this.values).map(([k, v]) => [k, v * factor])),
+    );
   }
 
   override set(attr: string, value: string): void {
@@ -45,7 +59,9 @@ export abstract class GeometryShape extends Shape {
     return result;
   }
 
-  protected value(name: string): number { return this.values[name]!; }
+  protected value(name: string): number {
+    return this.values[name]!;
+  }
   protected abstract copyGeometry(): GeometryShape;
 
   private validate(values: Record<string, number>): Record<string, number> {

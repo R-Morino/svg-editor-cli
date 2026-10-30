@@ -10,19 +10,30 @@ export abstract class Shape {
     this.identifier = id;
   }
 
-  get id(): string { return this.identifier; }
+  get id(): string {
+    return this.identifier;
+  }
   abstract get type(): string;
-  get label(): string { return `${this.type}#${this.id}`; }
-  get children(): readonly Shape[] { return []; }
-  get text(): string | undefined { return undefined; }
-  get attributes(): Readonly<Record<string, string>> { return { ...this.extras, ...this.styles }; }
+  get label(): string {
+    return `${this.type}#${this.id}`;
+  }
+  get children(): readonly Shape[] {
+    return [];
+  }
+  get text(): string | undefined {
+    return undefined;
+  }
+  get attributes(): Readonly<Record<string, string>> {
+    return { ...this.extras, ...this.styles };
+  }
   abstract move(dx: number, dy: number): void;
   abstract scale(factor: number): void;
   abstract clone(): Shape;
   abstract describe(): string;
 
   set(attr: string, value: string): void {
-    if (!['fill', 'stroke', 'stroke-width'].includes(attr)) throw new Error(`unknown attribute: ${attr}`);
+    if (!['fill', 'stroke', 'stroke-width'].includes(attr))
+      throw new Error(`unknown attribute: ${attr}`);
     if (attr === 'stroke-width') Numeric.nonNegative(value, attr);
     this.styles = { ...this.styles, [attr]: value };
   }
@@ -39,6 +50,7 @@ export abstract class Shape {
   protected appearanceSummary(): string {
     return Object.entries(this.attributes)
       .filter(([name]) => ['fill', 'stroke', 'stroke-width'].includes(name))
-      .map(([name, value]) => ` ${name}=${value}`).join('');
+      .map(([name, value]) => ` ${name}=${value}`)
+      .join('');
   }
 }

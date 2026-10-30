@@ -14,28 +14,47 @@ export class EditorSession {
   }
   init(width: number, height: number): string[] {
     const next = new SvgDocument(width, height);
-    this.current = next; this.path = undefined; this.history.barrier();
+    this.current = next;
+    this.path = undefined;
+    this.history.barrier();
     return [`canvas ${width}x${height} created`];
   }
   read(path: string): string[] {
     const result = this.store.read(path);
-    this.current = result.document; this.path = path; this.history.barrier();
+    this.current = result.document;
+    this.path = path;
+    this.history.barrier();
     return [...result.warnings, `read ${path} (${this.document.count} elements)`];
   }
   save(path?: string): string[] {
-    const document = this.document; const target = path ?? this.path;
+    const document = this.document;
+    const target = path ?? this.path;
     if (!target) throw new Error('no file path. use save <file.svg>');
     this.store.write(target, document);
-    this.path = target; this.history.barrier();
+    this.path = target;
+    this.history.barrier();
     return [`saved to ${target} (${document.count} elements)`];
   }
   resize(width: number, height: number): string[] {
-    const draft = this.document.clone(); draft.resize(width, height);
-    this.current = draft; this.history.barrier();
+    const draft = this.document.clone();
+    draft.resize(width, height);
+    this.current = draft;
+    this.history.barrier();
     return [`canvas resized to ${width}x${height}`];
   }
-  commit(command: UndoableCommand, document: SvgDocument): void { this.current = document; this.history.record(command); }
-  restore(document: SvgDocument): void { this.current = document.clone(); }
-  undo(): string[] { void this.document; return this.history.undo(); }
-  redo(): string[] { void this.document; return this.history.redo(); }
+  commit(command: UndoableCommand, document: SvgDocument): void {
+    this.current = document;
+    this.history.record(command);
+  }
+  restore(document: SvgDocument): void {
+    this.current = document.clone();
+  }
+  undo(): string[] {
+    void this.document;
+    return this.history.undo();
+  }
+  redo(): string[] {
+    void this.document;
+    return this.history.redo();
+  }
 }

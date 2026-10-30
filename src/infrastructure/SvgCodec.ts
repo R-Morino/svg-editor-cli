@@ -11,24 +11,37 @@ export class SvgCodec {
 
   decode(source: string): { document: SvgDocument; warnings: string[] } {
     try {
-      const xml = new DOMParser({ onError: onWarningStopParsing }).parseFromString(source, 'image/svg+xml');
+      const xml = new DOMParser({ onError: onWarningStopParsing }).parseFromString(
+        source,
+        'image/svg+xml',
+      );
       if (xml.doctype) throw new Error('DOCTYPE is not supported');
       const root = xml.documentElement;
       if (!root || root.localName !== 'svg') throw new Error('root element must be svg');
       this.checkNamespace(root);
       const rootAttributes = this.attributes(root);
-      const document = new SvgDocument(this.length(rootAttributes.width, '800'), this.length(rootAttributes.height, '600'), rootAttributes);
+      const document = new SvgDocument(
+        this.length(rootAttributes.width, '800'),
+        this.length(rootAttributes.height, '600'),
+        rootAttributes,
+      );
       const reserved = new Set<string>();
       const elements = xml.getElementsByTagName('*');
       for (let index = 0; index < elements.length; index++) {
         const id = elements.item(index)!.getAttribute('id');
-        if (id) { if (reserved.has(id)) throw new Error(`id already exists: ${id}`); reserved.add(id); }
+        if (id) {
+          if (reserved.has(id)) throw new Error(`id already exists: ${id}`);
+          reserved.add(id);
+        }
       }
       const warnings: string[] = [];
-      for (const child of this.elements(root)) document.add(this.readShape(child, reserved, warnings));
+      for (const child of this.elements(root))
+        document.add(this.readShape(child, reserved, warnings));
       return { document, warnings };
     } catch (error) {
-      throw new Error(`invalid SVG: ${error instanceof Error ? error.message.replace(/[\r\n]+/gu, ' ') : String(error)}`);
+      throw new Error(
+        `invalid SVG: ${error instanceof Error ? error.message.replace(/[\r\n]+/gu, ' ') : String(error)}`,
+      );
     }
   }
 
@@ -46,13 +59,16 @@ export class SvgCodec {
     const type = element.localName ?? element.tagName;
     let id = attributes.id;
     if (!id) {
-      let number = 1; while (reserved.has(`${type}${number}`)) number++;
-      id = `${type}${number}`; reserved.add(id);
+      let number = 1;
+      while (reserved.has(`${type}${number}`)) number++;
+      id = `${type}${number}`;
+      reserved.add(id);
       warnings.push(`warning: assigned id ${id} to unnamed <${type}>`);
     }
     const shape = this.factory.fromAttributes(type, id, attributes, element.textContent ?? '');
     const children = this.elements(element);
-    if (shape instanceof Group) children.forEach(child => shape.insert(this.readShape(child, reserved, warnings)));
+    if (shape instanceof Group)
+      children.forEach((child) => shape.insert(this.readShape(child, reserved, warnings)));
     else if (children.length) throw new Error(`nested elements are not supported in <${type}>`);
     return shape;
   }
@@ -78,17 +94,20 @@ export class SvgCodec {
     const result: Record<string, string> = {};
     for (let index = 0; index < element.attributes.length; index++) {
       const attribute = element.attributes.item(index)!;
-      if (/^on/iu.test(attribute.name)) throw new Error(`event attribute is not supported: ${attribute.name}`);
+      if (/^on/iu.test(attribute.name))
+        throw new Error(`event attribute is not supported: ${attribute.name}`);
       result[attribute.name] = attribute.value;
     }
     return result;
   }
   private checkNamespace(element: Element): void {
-    if (element.namespaceURI && element.namespaceURI !== this.namespace) throw new Error(`unsupported namespace: ${element.namespaceURI}`);
+    if (element.namespaceURI && element.namespaceURI !== this.namespace)
+      throw new Error(`unsupported namespace: ${element.namespaceURI}`);
   }
   private length(value: string | undefined, fallback: string): number {
     const raw = value ?? fallback;
-    if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?(?:px)?$/iu.test(raw)) throw new Error(`unsupported canvas length: ${raw}`);
+    if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?(?:px)?$/iu.test(raw))
+      throw new Error(`unsupported canvas length: ${raw}`);
     return Number(raw.replace(/px$/iu, ''));
   }
 }

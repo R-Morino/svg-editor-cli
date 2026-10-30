@@ -11,7 +11,9 @@ export class ArchitectureCheck {
   run(): void {
     this.walk(this.source);
     if (this.violations.length) throw new Error(this.violations.join('\n'));
-    console.log(`Architecture OK: ${this.files} TypeScript files, ${this.edges} imports; dependency rules, one class per file, no top-level functions and restricted dispatch checked.`);
+    console.log(
+      `Architecture OK: ${this.files} TypeScript files, ${this.edges} imports; dependency rules, one class per file, no top-level functions and switch placement checked.`,
+    );
   }
   private walk(directory: string): void {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
@@ -29,19 +31,30 @@ export class ArchitectureCheck {
     for (const statement of ast.statements) {
       if (ts.isClassDeclaration(statement)) {
         classes++;
-        if (statement.name?.text !== name.split('/').at(-1)!.replace(/\.ts$/u, '')) this.violations.push(`${name}: class name does not match file`);
+        if (statement.name?.text !== name.split('/').at(-1)!.replace(/\.ts$/u, ''))
+          this.violations.push(`${name}: class name does not match file`);
       }
-      if (ts.isFunctionDeclaration(statement)) this.violations.push(`${name}: top-level procedural function`);
+      if (ts.isFunctionDeclaration(statement))
+        this.violations.push(`${name}: top-level procedural function`);
       if (ts.isImportDeclaration(statement) && ts.isStringLiteral(statement.moduleSpecifier)) {
         this.edges++;
         const specifier = statement.moduleSpecifier.text;
-        const target = specifier.startsWith('.') ? relative(this.source, resolve(dirname(path), specifier)).split(sep).join('/') : specifier;
-        if (!this.allowed(layer, target)) this.violations.push(`${name}: forbidden dependency ${specifier}`);
+        const target = specifier.startsWith('.')
+          ? relative(this.source, resolve(dirname(path), specifier))
+              .split(sep)
+              .join('/')
+          : specifier;
+        if (!this.allowed(layer, target))
+          this.violations.push(`${name}: forbidden dependency ${specifier}`);
       }
     }
     if (classes > 1) this.violations.push(`${name}: more than one class`);
     const visit = (node: ts.Node): void => {
-      if (ts.isSwitchStatement(node) && !['cli/CommandDispatcher.ts', 'domain/ShapeFactory.ts'].includes(name)) this.violations.push(`${name}: switch outside the two allowed dispatch points`);
+      if (
+        ts.isSwitchStatement(node) &&
+        !['cli/CommandDispatcher.ts', 'domain/ShapeFactory.ts'].includes(name)
+      )
+        this.violations.push(`${name}: switch outside the two allowed dispatch points`);
       ts.forEachChild(node, visit);
     };
     visit(ast);
@@ -51,10 +64,18 @@ export class ArchitectureCheck {
     if (target.startsWith(`${layer}/`)) return true;
     if (layer === 'domain') return false;
     if (layer === 'application') return target.startsWith('domain/');
-    if (layer === 'cli') return target.startsWith('application/') || ['node:readline', 'node:stream'].includes(target);
-    if (layer === 'infrastructure') return target.startsWith('domain/') || target === 'application/DocumentStore.js' || target.startsWith('node:') || target === '@xmldom/xmldom';
+    if (layer === 'cli')
+      return target.startsWith('application/') || ['node:readline', 'node:stream'].includes(target);
+    if (layer === 'infrastructure')
+      return (
+        target.startsWith('domain/') ||
+        target === 'application/DocumentStore.js' ||
+        target.startsWith('node:') ||
+        target === '@xmldom/xmldom'
+      );
     return false;
   }
 }
 
-if (process.argv[1]?.replace(/\\/gu, '/').endsWith('/ArchitectureCheck.ts')) new ArchitectureCheck().run();
+if (process.argv[1]?.replace(/\\/gu, '/').endsWith('/ArchitectureCheck.ts'))
+  new ArchitectureCheck().run();

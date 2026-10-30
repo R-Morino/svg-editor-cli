@@ -5,4 +5,4 @@ import { SvgFileStore } from './infrastructure/SvgFileStore.js';
 
 const session = new EditorSession(new SvgFileStore());
 const repl = new Repl(new CommandDispatcher(session));
-process.exitCode = await repl.run(process.stdin, process.stdout) ? 0 : 1;
+process.exitCode = (await repl.run(process.stdin, process.stdout)) ? 0 : 1;

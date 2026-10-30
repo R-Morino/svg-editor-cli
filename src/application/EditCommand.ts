@@ -9,11 +9,21 @@ export abstract class EditCommand extends SessionCommand implements UndoableComm
     const before = this.session.document.clone();
     const draft = before.clone();
     const summary = this.apply(draft); // All validation/mutations occur off the active document.
-    this.before = before; this.after = draft.clone(); this.summary = summary;
+    this.before = before;
+    this.after = draft.clone();
+    this.summary = summary;
     this.session.commit(this, draft);
     return [summary];
   }
-  undo(): string[] { if (!this.before) throw new Error('command has not executed'); this.session.restore(this.before); return [`undone: ${this.summary}`]; }
-  redo(): string[] { if (!this.after) throw new Error('command has not executed'); this.session.restore(this.after); return [`redone: ${this.summary}`]; }
+  undo(): string[] {
+    if (!this.before) throw new Error('command has not executed');
+    this.session.restore(this.before);
+    return [`undone: ${this.summary}`];
+  }
+  redo(): string[] {
+    if (!this.after) throw new Error('command has not executed');
+    this.session.restore(this.after);
+    return [`redone: ${this.summary}`];
+  }
   protected abstract apply(document: SvgDocument): string;
 }

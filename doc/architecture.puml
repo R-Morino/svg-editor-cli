@@ -1,0 +1,15 @@
+@startuml
+title SVG Editor CLI — Phase 1
+skinparam componentStyle rectangle
+component "main.ts\ncomposition root" as main
+package cli { component "Repl / Tokenizer / CommandDispatcher" as cli }
+package application { component "EditorSession / Command / History\nports: DocumentStore" as app }
+package domain { component "SvgDocument / Shape / Group\nGeometryShape / six concrete shapes / ShapeFactory" as domain }
+package infrastructure { component "SvgCodec / SvgFileStore\nXML library / filesystem" as infra }
+main --> cli
+main --> infra
+cli --> app
+app --> domain
+infra --> app : implements port
+infra --> domain
+@enduml

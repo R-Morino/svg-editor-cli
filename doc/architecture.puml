@@ -2,10 +2,18 @@
 title SVG Editor CLI — Phase 1
 skinparam componentStyle rectangle
 component "main.ts\ncomposition root" as main
-package cli { component "Repl / Tokenizer / CommandDispatcher" as cli }
-package application { component "EditorSession / Command / History\nports: DocumentStore" as app }
-package domain { component "SvgDocument / Shape / Group\nGeometryShape / six concrete shapes / ShapeFactory" as domain }
-package infrastructure { component "SvgCodec / SvgFileStore\nXML library / filesystem" as infra }
+package "cli" as cli_pkg {
+  component "Repl / Tokenizer / CommandDispatcher" as cli
+}
+package "application" as app_pkg {
+  component "EditorSession / Command / History\nports: DocumentStore" as app
+}
+package "domain" as domain_pkg {
+  component "SvgDocument / Shape / Group\nGeometryShape / six concrete shapes / ShapeFactory" as domain
+}
+package "infrastructure" as infra_pkg {
+  component "SvgCodec / SvgFileStore\nXML library / filesystem" as infra
+}
 main --> cli
 main --> infra
 cli --> app

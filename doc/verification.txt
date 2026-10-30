@@ -1,0 +1,65 @@
+Validation date: 2026-10-30 (Asia/Shanghai)
+Source code revision: 9c14dfd0c2f5f94b014e932ce4013f72eb2dbace
+Final changes: documentation, evidence and test helper files split to keep one class per file.
+Node: v24.18.0
+npm: 11.16.0
+
+npm ci was run successfully before this final validation (8 packages installed, no vulnerabilities reported).
+
+
+> svg-editor-cli@0.1.0 check
+> npm run format:check && npm run typecheck && npm test && npm run check:architecture
+
+
+> svg-editor-cli@0.1.0 format:check
+> prettier --check src test scripts package.json package-lock.json tsconfig.json .github README.md doc/README.md .prettierrc.json
+
+Checking formatting...
+All matched files use Prettier code style!
+
+> svg-editor-cli@0.1.0 typecheck
+> tsc --noEmit
+
+
+> svg-editor-cli@0.1.0 test
+> tsx --test test/*.test.ts
+
+✔ interactive input displays svg> prompt and continues after an error (3.7196ms)
+✔ real CLI stdin supports comments, unicode, saved SVG and no TTY prompt noise (263.8528ms)
+✔ task transcript recovers after two intentional errors, imports sample and exits 1 (171.0058ms)
+✔ bad syntax produces one-line errors and subsequent commands still execute (157.8364ms)
+✔ tokenizer preserves colors, Windows paths, quoted spaces and empty text (1.0796ms)
+✔ help works without document; stateful commands report missing document (0.5218ms)
+✔ one group command is one undo unit; redo restores exact tree (1.1833ms)
+✔ failed edits and malformed input preserve redo; successful new edit clears it (0.9005ms)
+✔ nested group edits, subtree delete, addto, ungroup and z-order all undo exactly (1.6108ms)
+✔ recursive overflow rolls back every descendant and keeps previous undo record (0.3502ms)
+✔ IO and canvas writes are barriers; queries and failed IO are not (0.4969ms)
+✔ create in clause, error strings and attribute white lists (0.3082ms)
+✔ all six built-ins preserve omitted appearance and use polymorphic geometry (1.2657ms)
+✔ nested groups move/scale descendants, inherit paint and clone independently (0.3334ms)
+✔ group preserves document order across parents and rejects ancestor overlap (0.6444ms)
+✔ ungroup promotes children in place, top-level ungroup is forbidden, z-order is local (0.1913ms)
+✔ ids are case-sensitive and unique; invalid fields and dimensions are rejected (0.2026ms)
+✔ external sample imports all seven elements and warns about its missing id (3.9482ms)
+✔ auto ids reserve later explicit ids and previously assigned names globally (0.4427ms)
+✔ SVG round trip preserves order, XML escaping, unicode, transforms and inherited appearance (1.9353ms)
+✔ malformed XML, duplicate ids and unsupported content are rejected explicitly (1.3242ms)
+✔ actual file save overwrites atomically, defaults to last path and keeps IO barrier (6.9639ms)
+✔ failed read/save preserves document, redo and the default file path (5.4693ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 967.3052
+
+> svg-editor-cli@0.1.0 check:architecture
+> tsx scripts/ArchitectureCheck.ts
+
+Architecture OK: 44 TypeScript files, 110 imports; dependency rules, one class per file, no top-level functions and switch placement checked.
+
+> svg-editor-cli@0.1.0 build
+> tsc -p tsconfig.json

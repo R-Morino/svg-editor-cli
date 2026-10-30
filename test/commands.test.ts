@@ -1,30 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CommandDispatcher } from '../src/cli/CommandDispatcher.js';
-import { EditorSession } from '../src/application/EditorSession.js';
-import type { DocumentStore } from '../src/application/DocumentStore.js';
-import { SvgDocument } from '../src/domain/SvgDocument.js';
 import { Tokenizer } from '../src/cli/Tokenizer.js';
-
-class MemoryStore implements DocumentStore {
-  private files = new Map<string, SvgDocument>();
-  read(path: string) {
-    const document = this.files.get(path);
-    if (!document) throw new Error(`cannot read file: ${path}`);
-    return { document: document.clone(), warnings: [] };
-  }
-  write(path: string, document: SvgDocument): void {
-    if (path === 'unwritable') throw new Error(`cannot write file: ${path}`);
-    this.files.set(path, document.clone());
-  }
-}
-class Harness {
-  readonly session = new EditorSession(new MemoryStore());
-  readonly cli = new CommandDispatcher(this.session);
-  run(...lines: string[]): string[] {
-    return lines.flatMap((line) => this.cli.execute(line));
-  }
-}
+import { Harness } from './Harness.js';
 
 test('tokenizer preserves colors, Windows paths, quoted spaces and empty text', () => {
   const tokenizer = new Tokenizer();

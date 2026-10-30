@@ -5,6 +5,20 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { TemporaryDirectory } from './TemporaryDirectory.js';
 import { SvgFileStore } from '../src/infrastructure/SvgFileStore.js';
+import { Readable, Writable } from 'node:stream';
+import { Repl } from '../src/cli/Repl.js';
+import { CommandDispatcher } from '../src/cli/CommandDispatcher.js';
+import { EditorSession } from '../src/application/EditorSession.js';
+
+test('interactive input displays svg> prompt and continues after an error', async () => {
+  const input = Readable.from(['init\nnot-a-command\ncreate g scene\ntree\n']) as Readable & { isTTY: boolean };
+  input.isTTY = true;
+  let transcript = '';
+  const output = new Writable({ write(chunk, _encoding, callback) { transcript += String(chunk); callback(); } });
+  const repl = new Repl(new CommandDispatcher(new EditorSession(new SvgFileStore())));
+  assert.equal(await repl.run(input, output), false);
+  assert.ok(transcript.includes('svg> ')); assert.match(transcript, /error: unknown command: not-a-command/); assert.match(transcript, /g#scene created/);
+});
 
 test('real CLI stdin supports comments, unicode, saved SVG and no TTY prompt noise', () => {
   const temporary = new TemporaryDirectory();

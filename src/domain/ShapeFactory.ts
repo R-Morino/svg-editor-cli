@@ -37,7 +37,7 @@ export class ShapeFactory {
     const result = definition.build(id, values, text);
     const extras: Record<string, string> = {};
     for (const [name, value] of Object.entries(attributes)) {
-      if (name === 'id' || name === 'transform' || definition.geometry.includes(name)) continue;
+      if (name === 'id' || definition.geometry.includes(name)) continue;
       if (['fill', 'stroke', 'stroke-width'].includes(name)) result.set(name, value);
       else extras[name] = value;
     }

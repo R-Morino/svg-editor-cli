@@ -50,6 +50,7 @@ export class SvgDocument {
     const collect = (node: Shape): void => { incoming.push(node); node.children.forEach(collect); };
     collect(shape);
     const ids = new Set(this.all().map(item => item.id));
+    if (this.rootAttributes.id) ids.add(this.rootAttributes.id);
     for (const node of incoming) { if (ids.has(node.id)) throw new Error(`id already exists: ${node.id}`); ids.add(node.id); }
     (parentId ? this.container(parentId) : this.root).insert(shape);
   }
